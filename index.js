@@ -1,35 +1,28 @@
-//node bot.js to start bot
-const Discord = require('discord.js')
-const { token } = require('./constants/token')
-const client = new Discord.Client()
-const fetch = require("node-fetch");
+require('dotenv').config();
+const Discord = require('discord.js');
 
-//change token in token.json
-client.login(token);
+const fetch = require('node-fetch');
 
-//tells you on terminal below which bot token you have
+const { Client, Intents } = require('discord.js');
+
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+
 client.on('ready', () => {
-    console.info(`Logged in as ${client.user.tag}!`);
+  console.log(`Logged in as ${client.user.tag}!`);
 });
 
+client.login(process.env.CLIENT_TOKEN);
 
-//take command
+
+// get a random fact about penguins from the internet and send it to the channel where the command was called
 client.on('message', msg => {
-    //this is the only current command !fact to throw random fact
-    if(msg.content === '!fact'){
-        //this website has 1400ish random facts
-        var id = Math.floor((Math.random() * 1399) + 1);
-        fetch('http://www.randomfactgenerator.net/?id=' + id).then(function(url){
-            fact = url.text().then(function(text){
-                var index = 2077
-                while (text.charAt(index) != '<'){
-                    index++;
-                }
-                var fact = text.substring(2077, index);
-                //hit 'em with that knowledge
-                msg.channel.send(fact);
-            })
-        });
-
+    if (msg.content === '!penguin') {
+        fetch('https://penguin-fact.herokuapp.com/')
+            .then(res => res.json())
+            .then(json => {
+                msg.channel.send(json.fact);
+            }
+        );
     }
-});
+}
+);
